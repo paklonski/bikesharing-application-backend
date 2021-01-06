@@ -2,12 +2,13 @@ package cz.cvut.bikesharingproject.rest;
 
 import cz.cvut.bikesharingproject.exception.NotFoundException;
 import cz.cvut.bikesharingproject.exception.ValidationException;
+import cz.cvut.bikesharingproject.model.Bike;
 import cz.cvut.bikesharingproject.model.ParkingStation;
-import cz.cvut.bikesharingproject.model.enums.CityDistrict;
+import cz.cvut.bikesharingproject.model.enums.District;
 import cz.cvut.bikesharingproject.rest.utils.RestUtils;
+import cz.cvut.bikesharingproject.service.BikeService;
 import cz.cvut.bikesharingproject.service.ParkingStationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,24 +19,25 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @RestController
-@RequestMapping("rest/station")
+@RequestMapping("/api/v1/stations")
 public class ParkingStationController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ParkingStationController.class);
+    private final BikeService bikeService;
 
-    private ParkingStationService parkingStationService;
+    private final ParkingStationService parkingStationService;
 
     @Autowired
-    public ParkingStationController(ParkingStationService parkingStationService) {
+    public ParkingStationController(BikeService bikeService, ParkingStationService parkingStationService) {
+        this.bikeService = bikeService;
         this.parkingStationService = parkingStationService;
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> addParkingStation(@RequestBody ParkingStation parkingStation) {
-        Objects.requireNonNull(parkingStation);
         parkingStationService.persist(parkingStation);
-        LOG.debug("The parking station {} is successfully added.", parkingStation);
+        log.info("{} is successfully added.", parkingStation);
         final HttpHeaders httpHeaders = RestUtils.createLocationHeaderFromCurrentUri(
                 "/{id}", parkingStation.getId());
         return new ResponseEntity<>(httpHeaders, HttpStatus.CREATED);
@@ -43,7 +45,6 @@ public class ParkingStationController {
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ParkingStation getParkingStation(@PathVariable Integer id) {
-        Objects.requireNonNull(id);
         final ParkingStation parkingStation = parkingStationService.find(id);
         if (parkingStation == null) {
             throw NotFoundException.create("Parking station", id);
@@ -56,21 +57,31 @@ public class ParkingStationController {
         return parkingStationService.findAll();
     }
 
-    @GetMapping(value = "/location", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ParkingStation> getAllByLocation(@RequestBody CityDistrict cityDistrict) {
-        Objects.requireNonNull(cityDistrict);
-        return parkingStationService.findAllByLocation(cityDistrict);
+    @GetMapping(value = "/districts/{district}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<ParkingStation> getAllByLocation(@PathVariable District district) {
+        return parkingStationService.findAllByLocation(district);
     }
 
-    @GetMapping(value = "/free", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/free-bikes", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<ParkingStation> getAllWithFreeBikes() {
         return parkingStationService.findAllWithFreeBikes();
     }
 
+
+    @PutMapping(value = "/{stationId}/bikes/{bikeId}/add")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addBikeToParkingStation(@PathVariable Integer stationId,
+                                        @PathVariable Integer bikeId) {
+        final ParkingStation parkingStation = parkingStationService.find(stationId);
+        final Bike bike = bikeService.find(bikeId);
+        parkingStationService.addBikeToParkingStation(parkingStation, bike);
+        log.info("{} has been added to {}.", bike, parkingStation);
+    }
+
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateParkingStationData(@PathVariable Integer id, @RequestBody ParkingStation parkingStation) {
-        Objects.requireNonNull(id);
+    public void updateParkingStation(@PathVariable Integer id,
+                                     @RequestBody ParkingStation parkingStation) {
         Objects.requireNonNull(parkingStation);
         final ParkingStation parkingStationToUpdate = parkingStationService.find(id);
         if (!parkingStationToUpdate.getId().equals(parkingStation.getId())) {
@@ -78,7 +89,22 @@ public class ParkingStationController {
                     "the parking station ID in the database.");
         }
         parkingStationService.update(parkingStation);
-        LOG.debug("The parking station {} up to date.", parkingStation);
+        log.info("{} up to date.", parkingStation);
+    }
+
+    @PatchMapping(value = "/{id}/update-capacity", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateParkingStationCapacity(@PathVariable Integer id,
+                                             @RequestBody ParkingStation partialUpdate) {
+        Objects.requireNonNull(partialUpdate);
+        final ParkingStation parkingStationToUpdate = parkingStationService.find(id);
+        if (!parkingStationToUpdate.getId().equals(partialUpdate.getId())) {
+            throw new ValidationException("The parking station ID in the request does not match " +
+                    "the parking station ID in the database.");
+        }
+        parkingStationToUpdate.setCapacity(partialUpdate.getCapacity());
+        parkingStationService.update(parkingStationToUpdate);
+        log.info("{} up to date.", parkingStationToUpdate);
     }
 
     @DeleteMapping(value = "/{id}")
@@ -89,6 +115,6 @@ public class ParkingStationController {
             return;
         }
         parkingStationService.remove(parkingStationToRemove);
-        LOG.debug("The parking station {} is successfully removed.", parkingStationToRemove);
+        log.info("{} is successfully removed.", parkingStationToRemove);
     }
 }

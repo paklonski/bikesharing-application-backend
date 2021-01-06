@@ -15,5 +15,5 @@ public abstract class AbstractEntity implements Serializable {
 
     @Basic(optional = false)
     @Column(nullable = false)
-    private boolean isRemoved;
+    private boolean enabled;
 }

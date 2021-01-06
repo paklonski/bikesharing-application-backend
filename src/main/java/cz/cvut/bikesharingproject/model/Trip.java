@@ -1,48 +1,60 @@
 package cz.cvut.bikesharingproject.model;
 
+import com.fasterxml.jackson.annotation.*;
 import lombok.Data;
+import lombok.ToString;
 
 import javax.persistence.*;
-import java.time.Duration;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 @Data
 @Entity
+@Table(name = "TRIPS")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class Trip extends AbstractEntity {
 
     @Basic(optional = false)
     @Column(nullable = false)
-    private boolean isClosed;
+    private boolean opened;
+
+    @ManyToOne
+    @JoinColumn(name = "startstation_id", nullable = false)
+    private ParkingStation startParkingStation;
+
+    @ManyToOne
+    @JoinColumn(name = "finalstation_id")
+    private ParkingStation finalParkingStation;
 
     @Basic(optional = false)
     @Column(nullable = false)
     private LocalDateTime startRentalTime;
 
     @Basic(optional = false)
-    @Column(nullable = false)
+    @Column
     private LocalDateTime finalRentalTime;
 
-    // TODO. Change double to Duration, columnDefinition = "interval".
     @Basic(optional = false)
-    @Column(nullable = false)
-    private double duration;
+    @Column
+    private Long durationInMinutes;
 
     @Basic(optional = false)
-    @Column(nullable = false)
-    private double totalFee;
+    @Column(columnDefinition = "NUMERIC(7,2)")
+    private BigDecimal totalFee;
 
-    // TODO. Add nullable = false.
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @ToString.Exclude
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "trip")
-    private List<CustomerSupportForm> supportForms;
+    private List<RentalProblem> rentalProblems;
 
-    // TODO. Add nullable = false
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "bike_id")
+    @JoinColumn(name = "bike_id", nullable = false)
     private Bike bike;
 }

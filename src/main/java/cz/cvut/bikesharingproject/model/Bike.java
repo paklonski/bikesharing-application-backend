@@ -1,17 +1,25 @@
 package cz.cvut.bikesharingproject.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.time.Duration;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
 @Entity
+@Table(name = "BIKES")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 @NamedQueries({
-        @NamedQuery(name = "Bike.findRent", query = "SELECT b FROM Bike b WHERE b.isRemoved = false AND b.isRent = true")
+        @NamedQuery(name = "Bike.findAll", query = "SELECT b FROM Bike b WHERE b.enabled = true"),
+        @NamedQuery(name = "Bike.findRent", query = "SELECT b FROM Bike b WHERE b.enabled = true AND b.rent = true"),
+        @NamedQuery(name = "Bike.findFree", query = "SELECT b FROM Bike b WHERE b.enabled = true AND b.rent = false")
 })
 public class Bike extends AbstractEntity {
 
@@ -25,27 +33,22 @@ public class Bike extends AbstractEntity {
 
     @Basic(optional = false)
     @Column(nullable = false)
-    private boolean isRent;
+    private boolean rent;
 
     @Basic(optional = false)
-    @Column(nullable = false)
-    private double pricePerMinute;
+    @Column(nullable = false, columnDefinition = "NUMERIC(7,2)")
+    private BigDecimal pricePerMinute;
 
-    // TODO. Change double to Duration, columnDefinition = "interval".
-    @Basic(optional = false)
-    @Column(nullable = false)
-    private double totalRentalDuration;
-
-    // TODO. Cascade Types.
+    @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @JsonBackReference(value = "bike_station")
     @ManyToOne
     @JoinColumn(name = "station_id")
     private ParkingStation currentParkingStation;
 
-    @OneToMany(mappedBy = "bike")
+    @ToString.Exclude
+    @OneToMany(mappedBy = "bike", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Trip> tripHistory;
 
     @OneToMany(mappedBy = "bike")
-    private List<CustomerSupportForm> supportFormsHistory;
+    private List<DamagedBike> supportFormsHistory;
 }

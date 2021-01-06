@@ -1,33 +1,33 @@
-package cz.cvut.bikesharingproject.service;
-
-import cz.cvut.bikesharingproject.dao.BaseDao;
-import cz.cvut.bikesharingproject.dao.CustomerSupportFormDao;
-import cz.cvut.bikesharingproject.model.CustomerSupportForm;
-import cz.cvut.bikesharingproject.model.Trip;
-import cz.cvut.bikesharingproject.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-@Service
-public class CustomerSupportFormService extends BaseService<CustomerSupportForm> {
-
-    private CustomerSupportFormDao customerSupportFormDAO;
-
-    @Autowired
-    public CustomerSupportFormService(CustomerSupportFormDao customerSupportFormDAO) {
-        this.customerSupportFormDAO = customerSupportFormDAO;
-    }
-
-    @Override
-    protected BaseDao<CustomerSupportForm> getBaseDao() {
-        return customerSupportFormDAO;
-    }
+//package cz.cvut.bikesharingproject.service;
+//
+//import cz.cvut.bikesharingproject.dao.BaseDao;
+//import cz.cvut.bikesharingproject.dao.CustomerSupportFormDao;
+//import cz.cvut.bikesharingproject.model.CustomerSupportForm;
+//import cz.cvut.bikesharingproject.model.Trip;
+//import cz.cvut.bikesharingproject.model.User;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.stereotype.Service;
+//import org.springframework.transaction.annotation.Transactional;
+//
+//import java.util.List;
+//import java.util.Objects;
+//import java.util.stream.Collectors;
+//import java.util.stream.Stream;
+//
+//@Service
+//public class CustomerSupportFormService extends BaseService<CustomerSupportForm> {
+//
+//    private CustomerSupportFormDao customerSupportFormDAO;
+//
+//    @Autowired
+//    public CustomerSupportFormService(CustomerSupportFormDao customerSupportFormDAO) {
+//        this.customerSupportFormDAO = customerSupportFormDAO;
+//    }
+//
+//    @Override
+//    protected BaseDao<CustomerSupportForm> getBaseDao() {
+//        return customerSupportFormDAO;
+//    }
 //
 //    @Transactional
 //    public CustomerSupportForm createCustomerSupportForm(User user, Trip trip, String description) {
@@ -61,4 +61,4 @@ public class CustomerSupportFormService extends BaseService<CustomerSupportForm>
 //        csf.setClosed(true);
 //        customerSupportFormDAO.update(csf);
 //    }
-}
+//}

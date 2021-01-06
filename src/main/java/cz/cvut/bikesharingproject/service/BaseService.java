@@ -37,7 +37,6 @@ public abstract class BaseService<T extends AbstractEntity> {
     @Transactional
     public void remove(T entity) {
         Objects.requireNonNull(entity);
-        entity.setRemoved(true);
-        getBaseDao().update(entity);
+        getBaseDao().remove(entity);
     }
 }

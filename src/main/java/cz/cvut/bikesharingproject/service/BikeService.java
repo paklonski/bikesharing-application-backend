@@ -2,7 +2,6 @@ package cz.cvut.bikesharingproject.service;
 
 import cz.cvut.bikesharingproject.dao.BaseDao;
 import cz.cvut.bikesharingproject.dao.BikeDao;
-import cz.cvut.bikesharingproject.exception.InsufficientAmountException;
 import cz.cvut.bikesharingproject.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,17 +15,21 @@ public class BikeService extends BaseService<Bike> {
 
     private BikeDao bikeDao;
 
-    private ParkingStationService parkingStationService;
-
     @Autowired
-    public BikeService(BikeDao bikeDao, ParkingStationService parkingStationService) {
+    public BikeService(BikeDao bikeDao) {
         this.bikeDao = bikeDao;
-        this.parkingStationService = parkingStationService;
     }
 
     @Override
     protected BaseDao<Bike> getBaseDao() {
         return bikeDao;
+    }
+
+    @Override
+    public void persist(Bike bike) {
+        Objects.requireNonNull(bike);
+        bike.setRent(false);
+        super.persist(bike);
     }
 
     @Transactional
@@ -35,16 +38,8 @@ public class BikeService extends BaseService<Bike> {
     }
 
     @Transactional
-    public void setLocation(Bike bike, ParkingStation parkingStation) {
-        Objects.requireNonNull(bike);
-        Objects.requireNonNull(parkingStation);
-        if (parkingStationService.isPlaceForNewBike(parkingStation)) {
-            bike.setCurrentParkingStation(parkingStation);
-            parkingStation.getCurrentBikes().add(bike);
-            bikeDao.update(bike);
-        } else {
-            throw new InsufficientAmountException("The parking station " + parkingStation + " is full.");
-        }
+    public List<Bike> findFree() {
+        return bikeDao.findFree();
     }
 
     @Transactional
@@ -52,10 +47,6 @@ public class BikeService extends BaseService<Bike> {
         Objects.requireNonNull(bike);
         return bike.getCurrentParkingStation();
     }
-//
-//    @Transactional
-//    public List<Bike> findFree() {
-//    }
 //
 //    @Transactional
 //    public List<Bike> getBroken() {
@@ -91,10 +82,6 @@ public class BikeService extends BaseService<Bike> {
 //
 //    @Transactional
 //    public Bike updateParkingStation(Bike bike, ParkingStation parkingStation) {
-//    }
-//
-//    @Transactional
-//    public Bike setIsRent(Bike bike, boolean isRent) {
 //    }
 }
 

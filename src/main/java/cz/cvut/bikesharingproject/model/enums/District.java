@@ -1,6 +1,7 @@
 package cz.cvut.bikesharingproject.model.enums;
 
-public enum CityDistrict {
+public enum District {
+
     PRAHA_1("PRAHA_1"),
     PRAHA_2("PRAHA_2"),
     PRAHA_3("PRAHA_3"),
@@ -10,7 +11,12 @@ public enum CityDistrict {
 
     private final String name;
 
-    CityDistrict(String name) {
+    District(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

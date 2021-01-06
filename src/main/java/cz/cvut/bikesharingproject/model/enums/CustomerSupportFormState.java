@@ -1,6 +1,6 @@
 package cz.cvut.bikesharingproject.model.enums;
 
-public enum CSFStatus {
+public enum CustomerSupportFormState {
 
     OPENED("OPENED"),
     IN_PROGRESS("IN_PROGRESS"),
@@ -8,7 +8,12 @@ public enum CSFStatus {
 
     private final String name;
 
-    CSFStatus(String name) {
+    CustomerSupportFormState(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

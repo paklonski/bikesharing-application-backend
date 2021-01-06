@@ -24,6 +24,7 @@ public abstract class BaseDao<T extends AbstractEntity> implements GenericDao<T>
     public void persist(T entity) {
         Objects.requireNonNull(entity);
         try {
+            entity.setEnabled(true);
             em.persist(entity);
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
@@ -62,6 +63,7 @@ public abstract class BaseDao<T extends AbstractEntity> implements GenericDao<T>
     public T update(T entity) {
         Objects.requireNonNull(entity);
         try {
+            entity.setEnabled(true);
             return em.merge(entity);
         } catch (RuntimeException e) {
             throw new PersistenceException(e);
@@ -72,6 +74,7 @@ public abstract class BaseDao<T extends AbstractEntity> implements GenericDao<T>
     public void remove(T entity) {
         Objects.requireNonNull(entity);
         try {
+            entity.setEnabled(false);
             em.remove(em.merge(entity));
         } catch (RuntimeException e) {
             throw new PersistenceException(e);

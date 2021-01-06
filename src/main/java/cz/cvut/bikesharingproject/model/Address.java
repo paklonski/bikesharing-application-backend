@@ -5,9 +5,11 @@ import lombok.Data;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Table;
 
 @Data
 @Entity
+@Table(name = "ADDRESSES")
 public class Address extends AbstractEntity {
 
     @Basic(optional = false)

@@ -1,12 +1,13 @@
 package cz.cvut.bikesharingproject.model;
 
-import cz.cvut.bikesharingproject.model.enums.CityDistrict;
+import cz.cvut.bikesharingproject.model.enums.District;
 import lombok.Data;
 
 import javax.persistence.*;
 
 @Data
 @Entity
+@Table(name = "LOCATIONS")
 public class Location extends AbstractEntity {
 
     @Basic(optional = false)
@@ -17,6 +18,8 @@ public class Location extends AbstractEntity {
     @Column(nullable = false)
     private double longitude;
 
+    @Basic(optional = false)
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private CityDistrict cityDistrict;
+    private District district;
 }
