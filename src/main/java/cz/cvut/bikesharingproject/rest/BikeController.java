@@ -4,17 +4,15 @@ import cz.cvut.bikesharingproject.exception.NotFoundException;
 import cz.cvut.bikesharingproject.exception.ValidationException;
 import cz.cvut.bikesharingproject.model.Bike;
 import cz.cvut.bikesharingproject.model.ParkingStation;
-import cz.cvut.bikesharingproject.model.User;
 import cz.cvut.bikesharingproject.rest.utils.RestUtils;
 import cz.cvut.bikesharingproject.service.BikeService;
-import cz.cvut.bikesharingproject.service.ParkingStationService;
-//import cz.cvut.bikesharingproject.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,20 +23,15 @@ import java.util.Objects;
 @RequestMapping("/api/v1/bikes")
 public class BikeController {
 
-//    private UserService userService;
-
     private final BikeService bikeService;
 
-    private final ParkingStationService parkingStationService;
-
     @Autowired
-    public BikeController(BikeService bikeService, ParkingStationService parkingStationService) {
-//        this.userService = userService;
+    public BikeController(BikeService bikeService) {
         this.bikeService = bikeService;
-        this.parkingStationService = parkingStationService;
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PostMapping(value = "/add", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> addBike(@RequestBody Bike bike) {
         bikeService.persist(bike);
         log.info("{} is successfully added.", bike);
@@ -55,11 +48,13 @@ public class BikeController {
         return bike;
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Bike> getAllBikes() {
         return bikeService.findAll();
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping(value = "/rent", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Bike> getRentBikes() {
         return bikeService.findRent();
@@ -76,6 +71,7 @@ public class BikeController {
         return bikeService.getLocation(bike);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateBike(@PathVariable Integer id, @RequestBody Bike bike) {
@@ -89,20 +85,22 @@ public class BikeController {
         log.info("{} up to date.", bike);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PatchMapping(value = "/{id}/update-price", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateBikePrice(@PathVariable Integer id, @RequestBody Bike partialUpdate) {
-        Objects.requireNonNull(partialUpdate);
+    public void updateBikePrice(@PathVariable Integer id, @RequestBody Bike updates) {
+        Objects.requireNonNull(updates);
         final Bike bikeToUpdate = bikeService.find(id);
-        if (!bikeToUpdate.getId().equals(partialUpdate.getId())) {
+        if (!bikeToUpdate.getId().equals(updates.getId())) {
             throw new ValidationException("The bike ID in the request does not match " +
                     "the bike ID in the database.");
         }
-        bikeToUpdate.setPricePerMinute(partialUpdate.getPricePerMinute());
+        bikeToUpdate.setPricePerMinute(updates.getPricePerMinute());
         bikeService.update(bikeToUpdate);
         log.info("{} up to date.", bikeToUpdate);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeBike(@PathVariable Integer id) {

@@ -5,12 +5,11 @@ import cz.cvut.bikesharingproject.dao.UserDao;
 import cz.cvut.bikesharingproject.model.User;
 import cz.cvut.bikesharingproject.model.enums.Role;
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -23,17 +22,12 @@ public class UserService extends BaseService<User> {
         return userDao;
     }
 
-//        private final BCryptPasswordEncoder passwordEncoder;
-
-//    @Autowired
-//    public UserService(UserDao userDao, BCryptPasswordEncoder passwordEncoder) {
-//        this.userDao = userDao;
-//        this.passwordEncoder = passwordEncoder;
-//    }
+        private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserDao userDao) {
+    public UserService(UserDao userDao, BCryptPasswordEncoder passwordEncoder) {
         this.userDao = userDao;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -41,7 +35,7 @@ public class UserService extends BaseService<User> {
         Objects.requireNonNull(user);
         user.setBalance(new BigDecimal("0.0"));
         user.setRole(Role.USER);
-//        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         super.persist(user);
     }
 
@@ -49,6 +43,7 @@ public class UserService extends BaseService<User> {
         return userDao.findByUsername(username);
     }
 
+    @Transactional
     public void makePayment(User user, BigDecimal amount) {
         Objects.requireNonNull(user);
         Objects.requireNonNull(amount);

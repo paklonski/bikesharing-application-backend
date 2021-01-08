@@ -3,10 +3,11 @@ package cz.cvut.bikesharingproject.model;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -14,6 +15,7 @@ import java.util.List;
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "id")
+@EqualsAndHashCode(callSuper = false, exclude={"currentBikes"})
 public class ParkingStation extends AbstractEntity {
 
     @Basic(optional = false)
@@ -26,7 +28,7 @@ public class ParkingStation extends AbstractEntity {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "currentParkingStation")
-    private List<Bike> currentBikes;
+    private Set<Bike> currentBikes;
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private Location location;

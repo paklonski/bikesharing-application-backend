@@ -1,17 +1,10 @@
 package cz.cvut.bikesharingproject.dao;
 
 import cz.cvut.bikesharingproject.model.Bike;
-import cz.cvut.bikesharingproject.model.Trip;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.PersistenceException;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Repository
 public class BikeDao extends BaseDao<Bike> {

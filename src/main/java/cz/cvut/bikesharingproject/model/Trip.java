@@ -1,13 +1,14 @@
 package cz.cvut.bikesharingproject.model;
 
 import com.fasterxml.jackson.annotation.*;
+import cz.cvut.bikesharingproject.model.feedback.RentalProblemForm;
 import lombok.Data;
-import lombok.ToString;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -15,6 +16,7 @@ import java.util.List;
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "id")
+@EqualsAndHashCode(callSuper = false, exclude={"rentalProblems"})
 public class Trip extends AbstractEntity {
 
     @Basic(optional = false)
@@ -45,15 +47,14 @@ public class Trip extends AbstractEntity {
     @Column(columnDefinition = "NUMERIC(7,2)")
     private BigDecimal totalFee;
 
-    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "trip")
-    private List<RentalProblem> rentalProblems;
+    private Set<RentalProblemForm> rentalProblems;
 
-    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bike_id", nullable = false)
     private Bike bike;

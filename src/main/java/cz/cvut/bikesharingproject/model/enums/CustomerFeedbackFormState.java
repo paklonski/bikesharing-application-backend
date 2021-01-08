@@ -1,6 +1,6 @@
 package cz.cvut.bikesharingproject.model.enums;
 
-public enum CustomerSupportFormState {
+public enum CustomerFeedbackFormState {
 
     OPENED("OPENED"),
     IN_PROGRESS("IN_PROGRESS"),
@@ -8,7 +8,7 @@ public enum CustomerSupportFormState {
 
     private final String name;
 
-    CustomerSupportFormState(String name) {
+    CustomerFeedbackFormState(String name) {
         this.name = name;
     }
 

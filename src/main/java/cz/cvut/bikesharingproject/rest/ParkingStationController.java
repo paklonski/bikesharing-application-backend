@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,7 +35,8 @@ public class ParkingStationController {
         this.parkingStationService = parkingStationService;
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PostMapping(value = "/add", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> addParkingStation(@RequestBody ParkingStation parkingStation) {
         parkingStationService.persist(parkingStation);
         log.info("{} is successfully added.", parkingStation);
@@ -67,7 +69,7 @@ public class ParkingStationController {
         return parkingStationService.findAllWithFreeBikes();
     }
 
-
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping(value = "/{stationId}/bikes/{bikeId}/add")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addBikeToParkingStation(@PathVariable Integer stationId,
@@ -78,6 +80,7 @@ public class ParkingStationController {
         log.info("{} has been added to {}.", bike, parkingStation);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateParkingStation(@PathVariable Integer id,
@@ -92,21 +95,23 @@ public class ParkingStationController {
         log.info("{} up to date.", parkingStation);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PatchMapping(value = "/{id}/update-capacity", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateParkingStationCapacity(@PathVariable Integer id,
-                                             @RequestBody ParkingStation partialUpdate) {
-        Objects.requireNonNull(partialUpdate);
+                                             @RequestBody ParkingStation updates) {
+        Objects.requireNonNull(updates);
         final ParkingStation parkingStationToUpdate = parkingStationService.find(id);
-        if (!parkingStationToUpdate.getId().equals(partialUpdate.getId())) {
+        if (!parkingStationToUpdate.getId().equals(updates.getId())) {
             throw new ValidationException("The parking station ID in the request does not match " +
                     "the parking station ID in the database.");
         }
-        parkingStationToUpdate.setCapacity(partialUpdate.getCapacity());
+        parkingStationToUpdate.setCapacity(updates.getCapacity());
         parkingStationService.update(parkingStationToUpdate);
         log.info("{} up to date.", parkingStationToUpdate);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeParkingStation(@PathVariable Integer id) {

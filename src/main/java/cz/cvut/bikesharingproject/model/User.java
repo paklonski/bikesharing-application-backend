@@ -1,14 +1,15 @@
 package cz.cvut.bikesharingproject.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import cz.cvut.bikesharingproject.model.enums.Role;
+import cz.cvut.bikesharingproject.model.feedback.CustomerFeedbackForm;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -19,6 +20,7 @@ import java.util.List;
 @NamedQueries({
         @NamedQuery(name = "User.findByUsername", query = "SELECT u FROM User u WHERE u.username = :username")
 })
+@EqualsAndHashCode(callSuper = false, exclude={"rentalHistory", "feedbackForms"})
 public class User extends AbstractEntity {
 
     @Enumerated(EnumType.STRING)
@@ -60,10 +62,13 @@ public class User extends AbstractEntity {
     @Column(name = "balance", nullable = false, columnDefinition = "NUMERIC(7,2)")
     private BigDecimal balance;
 
-//    @ManyToMany(mappedBy = "participants")
-//    private List<CustomerSupportForm> supportFormsHistory;
+    @JsonIgnore
+    @ToString.Exclude
+    @ManyToMany(mappedBy = "participants", fetch = FetchType.LAZY)
+    private Set<CustomerFeedbackForm> feedbackForms;
 
+    @JsonIgnore
     @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Trip> rentalHistory;
+    private Set<Trip> rentalHistory;
 }

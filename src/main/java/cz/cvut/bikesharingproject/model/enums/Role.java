@@ -2,8 +2,8 @@ package cz.cvut.bikesharingproject.model.enums;
 
 public enum Role {
 
-    ADMIN("ADMIN"),
-    USER("USER");
+    ADMIN("ROLE_ADMIN"),
+    USER("ROLE_USER");
 
     private final String name;
 
